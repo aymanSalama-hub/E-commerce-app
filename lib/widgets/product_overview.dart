@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:second_app/models/product.dart';
 
 class ProductOverview extends StatefulWidget {
@@ -12,41 +14,13 @@ class ProductOverview extends StatefulWidget {
 
 class _ProductOverviewState extends State<ProductOverview> {
   int _currentPage = 0;
-  late Timer _timer;
-  late PageController _pageController;
+
   late List<String> images; // Moved to be accessible throughout the class
 
   @override
   void initState() {
     super.initState();
     images = [widget.product.image, widget.product.image, widget.product.image];
-    _pageController = PageController(viewportFraction: 0.6);
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (_currentPage < images.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -79,39 +53,66 @@ class _ProductOverviewState extends State<ProductOverview> {
               // Image carousel
               SizedBox(
                 height: 280,
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: images.length,
-                  onPageChanged: (index) {
-                    setState(() => _currentPage = index);
-                  },
-                  itemBuilder: (context, index) {
-                    return AnimatedBuilder(
-                      animation: _pageController,
-                      builder: (context, child) {
-                        double scale = 0.8;
-                        if (_pageController.position.haveDimensions) {
-                          scale = (_pageController.page! - index).abs();
-                          scale = (1 - (scale * 0.2)).clamp(0.8, 1.0);
-                        }
-                        return Transform.scale(scale: scale, child: child);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            // Changed from Image.asset to Image.network
-                            images[index],
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (context, error, stackTrace) =>
-                                    const Icon(Icons.error),
+                child: CarouselSlider(
+                  options: CarouselOptions(
+                    height: 250,
+                    autoPlay: true,
+                    autoPlayInterval: Duration(seconds: 3),
+                    enlargeCenterPage: true,
+                    viewportFraction: 0.8,
+                  ),
+                  items:
+                      images.map((item) {
+                        return GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder:
+                                  (_) => Dialog(
+                                    backgroundColor: Colors.black,
+                                    insetPadding: EdgeInsets.all(10),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Stack(
+                                        children: [
+                                          PhotoView(
+                                            imageProvider: AssetImage(item),
+                                            minScale:
+                                                PhotoViewComputedScale
+                                                    .contained,
+                                            maxScale:
+                                                PhotoViewComputedScale.covered *
+                                                2,
+                                          ),
+                                          Positioned(
+                                            top: 10,
+                                            right: 10,
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 30,
+                                              ),
+                                              onPressed:
+                                                  () => Navigator.pop(context),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.asset(
+                              item,
+                              fit: BoxFit.cover,
+                              width: 1000,
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
+                        );
+                      }).toList(),
                 ),
               ),
 
