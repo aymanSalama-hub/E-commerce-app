@@ -15,7 +15,7 @@ class ProductOverview extends StatefulWidget {
 class _ProductOverviewState extends State<ProductOverview> {
   int _currentPage = 0;
 
-  late List<String> images; // Moved to be accessible throughout the class
+  late List<String> images;
 
   @override
   void initState() {
@@ -32,7 +32,6 @@ class _ProductOverviewState extends State<ProductOverview> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // Header row
               Row(
                 children: [
                   IconButton(
@@ -50,7 +49,6 @@ class _ProductOverviewState extends State<ProductOverview> {
 
               const SizedBox(height: 10),
 
-              // Image carousel
               SizedBox(
                 height: 280,
                 child: CarouselSlider(
@@ -59,6 +57,11 @@ class _ProductOverviewState extends State<ProductOverview> {
                     autoPlay: true,
                     autoPlayInterval: Duration(seconds: 3),
                     enlargeCenterPage: true,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
                     viewportFraction: 0.8,
                   ),
                   items:
@@ -116,7 +119,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                 ),
               ),
 
-              // Page indicators
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -136,7 +138,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                 }),
               ),
 
-              // Product details
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -168,7 +169,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                 ],
               ),
 
-              // Rating stars
               const SizedBox(height: 10),
               Row(
                 children: const [
@@ -180,7 +180,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                 ],
               ),
 
-              // Product description
               const SizedBox(height: 10),
               Text(
                 widget.product.imageAlt,
@@ -188,8 +187,6 @@ class _ProductOverviewState extends State<ProductOverview> {
               ),
 
               const Spacer(),
-
-              // Action buttons
               Row(
                 children: [
                   Container(
